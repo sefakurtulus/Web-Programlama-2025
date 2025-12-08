@@ -1,0 +1,97 @@
+@model GymManagementSystem.Models.Entities.Appointment
+@{
+    ViewData["Title"] = "Randevu Detayları";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">📋 Randevu Detayları</h3>
+            </div>
+            <div class="card-body p-4">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h5 class="text-muted">Hizmet Bilgileri</h5>
+                        <p><strong>Hizmet:</strong> @Model.Service.Name</p>
+                        <p><strong>Açıklama:</strong> @Model.Service.Description</p>
+                        <p><strong>Süre:</strong> @Model.Service.DurationMinutes dakika</p>
+                        <p><strong>Ücret:</strong> @Model.Service.Price ₺</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="text-muted">Antrenör Bilgileri</h5>
+                        <p><strong>Ad Soyad:</strong> @Model.Trainer.FullName</p>
+                        <p><strong>Email:</strong> @Model.Trainer.Email</p>
+                        <p><strong>Telefon:</strong> @Model.Trainer.PhoneNumber</p>
+                        @if (!string.IsNullOrEmpty(Model.Trainer.Bio))
+                        {
+                            <p><strong>Bio:</strong> @Model.Trainer.Bio</p>
+                        }
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h5 class="text-muted">Randevu Bilgileri</h5>
+                        <p><strong>Tarih:</strong> @Model.AppointmentDate.ToString("dd MMMM yyyy, dddd")</p>
+                        <p><strong>Başlangıç:</strong> @Model.StartTime.ToString(@"hh\:mm")</p>
+                        <p><strong>Bitiş:</strong> @Model.EndTime.ToString(@"hh\:mm")</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="text-muted">Durum</h5>
+                        <p>
+                            @{
+                                var statusClass = Model.Status switch
+                                {
+                                    "Pending" => "warning",
+                                    "Approved" => "success",
+                                    "Cancelled" => "secondary",
+                                    "Completed" => "info",
+                                    _ => "primary"
+                                };
+
+                                var statusText = Model.Status switch
+                                {
+                                    "Pending" => "Beklemede",
+                                    "Approved" => "Onaylandı",
+                                    "Cancelled" => "İptal Edildi",
+                                    "Completed" => "Tamamlandı",
+                                    _ => Model.Status
+                                };
+                            }
+                            <span class="badge bg-@statusClass fs-6">@statusText</span>
+                        </p>
+                        <p><strong>Oluşturulma:</strong> @Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</p>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Notes))
+                {
+                    <hr />
+                    <h5 class="text-muted">Notlar</h5>
+                    <p class="alert alert-info">@Model.Notes</p>
+                }
+
+                <hr />
+
+                <div class="d-flex justify-content-between">
+                    <a asp-action="MyAppointments" class="btn btn-secondary">
+                        ← Geri Dön
+                    </a>
+                    @if (Model.Status == "Pending" || Model.Status == "Approved")
+                    {
+                        <form asp-action="Cancel" asp-route-id="@Model.Id" method="post" 
+                              onsubmit="return confirm('Randevuyu iptal etmek istediğinizden emin misiniz?');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-danger">
+                                İptal Et
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

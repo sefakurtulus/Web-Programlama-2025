@@ -1,0 +1,173 @@
+@model GymManagementSystem.Models.ViewModels.AiSuggestionViewModel
+@using GymManagementSystem.Models.Enums
+@{
+    ViewData["Title"] = "AI Fitness Önerisi";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow-lg">
+            <div class="card-header bg-info text-white">
+                <h3 class="mb-0">🤖 Kişiselleştirilmiş Fitness Önerileri</h3>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-info">
+                    <strong>ℹ️ Bilgi:</strong> Lütfen tüm bilgilerinizi doğru ve eksiksiz girin. AI koçunuz size özel bir program hazırlayacak!
+                </div>
+
+                <form asp-action="Generate" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <!-- Temel Bilgiler -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">📋 Temel Bilgiler</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label asp-for="Age" class="form-label">Yaş</label>
+                                    <input asp-for="Age" class="form-control" type="number" placeholder="Örn: 25" />
+                                    <span asp-validation-for="Age" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label asp-for="Weight" class="form-label">Kilo (kg)</label>
+                                    <input asp-for="Weight" class="form-control" type="number" step="0.1" placeholder="Örn: 75.5" />
+                                    <span asp-validation-for="Weight" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label asp-for="Height" class="form-label">Boy (metre)</label>
+                                    <input asp-for="Height" class="form-control" type="number" step="0.01" placeholder="Örn: 1.75" />
+                                    <span asp-validation-for="Height" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Cinsiyet</label>
+                                <div class="d-flex gap-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" asp-for="Gender" value="@((int)Gender.Erkek)" id="genderMale" />
+                                        <label class="form-check-label" for="genderMale">
+                                            👨 Erkek
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" asp-for="Gender" value="@((int)Gender.Kadın)" id="genderFemale" />
+                                        <label class="form-check-label" for="genderFemale">
+                                            👩 Kadın
+                                        </label>
+                                    </div>
+                                </div>
+                                <span asp-validation-for="Gender" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vücut Özellikleri -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">💪 Vücut Özellikleri</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="BodyType" class="form-label">Vücut Tipi</label>
+                                    <select asp-for="BodyType" class="form-select">
+                                        <option value="">-- Seçiniz --</option>
+                                        <option value="@((int)BodyType.Ektomorf)">Ektomorf (Zayıf, zor kilo alır)</option>
+                                        <option value="@((int)BodyType.Mezomorf)">Mezomorf (Atletik, kolay kas yapar)</option>
+                                        <option value="@((int)BodyType.Endomorf)">Endomorf (Geniş yapılı, çabuk kilo alır)</option>
+                                    </select>
+                                    <span asp-validation-for="BodyType" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="ActivityLevel" class="form-label">Günlük Aktivite Seviyesi</label>
+                                    <select asp-for="ActivityLevel" class="form-select">
+                                        <option value="">-- Seçiniz --</option>
+                                        <option value="@((int)ActivityLevel.Hareketsiz)">Hareketsiz (Masa başı işi)</option>
+                                        <option value="@((int)ActivityLevel.AzHareketli)">Az Hareketli (Haftada 1-2 gün)</option>
+                                        <option value="@((int)ActivityLevel.OrtaSeviye)">Orta Seviye (Haftada 3-4 gün)</option>
+                                        <option value="@((int)ActivityLevel.CokHareketli)">Çok Hareketli (Haftada 5+ gün)</option>
+                                    </select>
+                                    <span asp-validation-for="ActivityLevel" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hedef ve Program -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">🎯 Hedef ve Antrenman</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label asp-for="Goal" class="form-label">Hedefiniz</label>
+                                    <select asp-for="Goal" class="form-select">
+                                        <option value="">-- Seçiniz --</option>
+                                        <option value="@((int)FitnessGoal.KiloVermek)">🔥 Kilo Vermek (Yağ Yakma)</option>
+                                        <option value="@((int)FitnessGoal.KiloAlmak)">💪 Kilo Almak (Kas Yapma/Bulk)</option>
+                                        <option value="@((int)FitnessGoal.FormKorumak)">⚖️ Form Korumak (Maintain)</option>
+                                        <option value="@((int)FitnessGoal.KondisyonArtirmak)">🏃 Kondisyon Artırmak</option>
+                                    </select>
+                                    <span asp-validation-for="Goal" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label asp-for="WorkoutPlace" class="form-label">Antrenman Yeri</label>
+                                    <select asp-for="WorkoutPlace" class="form-select">
+                                        <option value="">-- Seçiniz --</option>
+                                        <option value="@((int)WorkoutPlace.SporSalonu)">🏋️ Spor Salonu</option>
+                                        <option value="@((int)WorkoutPlace.EvVucutAgirligi)">🏠 Ev (Vücut Ağırlığı ile)</option>
+                                        <option value="@((int)WorkoutPlace.EvDambilSeti)">🏠 Ev (Dambıl Seti ile)</option>
+                                    </select>
+                                    <span asp-validation-for="WorkoutPlace" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label asp-for="DaysPerWeek" class="form-label">Haftada Kaç Gün</label>
+                                    <input asp-for="DaysPerWeek" class="form-control" type="number" min="1" max="7" placeholder="Örn: 3" />
+                                    <span asp-validation-for="DaysPerWeek" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ekstra Bilgiler -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">📝 Ekstra Bilgiler</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label asp-for="UserNotes" class="form-label">Ekstra Belirtmek İstedikleriniz</label>
+                                <textarea asp-for="UserNotes" class="form-control" rows="4" 
+                                          placeholder="Sakatlık, allerji, özel durumlar vb. buraya yazabilirsiniz..."></textarea>
+                                <span asp-validation-for="UserNotes" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-info btn-lg text-white">
+                            🤖 AI Önerisi Al
+                        </button>
+                    </div>
+                </form>
+
+                <hr class="my-4" />
+
+                <div class="text-center">
+                    <a asp-action="MyRecommendations" class="btn btn-outline-secondary">
+                        📋 Geçmiş Önerilerim
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

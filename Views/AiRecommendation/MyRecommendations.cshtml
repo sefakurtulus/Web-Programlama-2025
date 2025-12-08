@@ -1,0 +1,151 @@
+@model List<GymManagementSystem.Models.Entities.AiRecommendation>
+@{
+    ViewData["Title"] = "Geçmiş AI Önerilerim";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-11">
+            <div class="card shadow-lg">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0">📋 Geçmiş AI Önerilerim</h3>
+                </div>
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <div class="alert alert-success">
+                            <strong>✅ Toplam @Model.Count adet AI öneriniz bulunuyor.</strong>
+                        </div>
+
+                        <div class="row">
+                            @foreach (var recommendation in Model)
+                            {
+                                <div class="col-md-12 mb-4">
+                                    <div class="card border-info">
+                                        <div class="card-header bg-light">
+                                            <div class="row align-items-center">
+                                                <div class="col-md-8">
+                                                    <h5 class="mb-0">
+                                                        📅 @recommendation.CreatedAt.ToString("dd MMMM yyyy HH:mm")
+                                                    </h5>
+                                                </div>
+                                                <div class="col-md-4 text-end">
+                                                    <span class="badge bg-info">
+                                                        BMI: @string.Format("{0:F2}", recommendation.Weight / (recommendation.Height * recommendation.Height))
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row mb-3">
+                                                <div class="col-md-3">
+                                                    <strong>📏 Boy:</strong> @string.Format("{0:F2}", recommendation.Height) m
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <strong>⚖️ Kilo:</strong> @recommendation.Weight kg
+                                                </div>
+                                                <div class="col-md-6">
+                                                    @if (!string.IsNullOrEmpty(recommendation.PhotoPath))
+                                                    {
+                                                        <strong>📸 Fotoğraf:</strong> 
+                                                        <span class="badge bg-success">Mevcut</span>
+                                                    }
+                                                </div>
+                                            </div>
+
+                                            <!-- Accordion for Recommendation Details -->
+                                            <div class="accordion" id="accordion@(recommendation.Id)">
+                                                <!-- Diet Plan -->
+                                                @if (!string.IsNullOrEmpty(recommendation.DietPlan))
+                                                {
+                                                    <div class="accordion-item">
+                                                        <h2 class="accordion-header" id="heading@(recommendation.Id)">
+                                                            <button class="accordion-button collapsed" type="button" 
+                                                                    data-bs-toggle="collapse" 
+                                                                    data-bs-target="#collapse@(recommendation.Id)" 
+                                                                    aria-expanded="false">
+                                                                <strong>🔍 Öneri Detaylarını Göster</strong>
+                                                            </button>
+                                                        </h2>
+                                                        <div id="collapse@(recommendation.Id)" 
+                                                             class="accordion-collapse collapse" 
+                                                             data-bs-parent="#accordion@(recommendation.Id)">
+                                                            <div class="accordion-body" style="background-color: #f8f9fa;">
+                                                                @Html.Raw(recommendation.DietPlan)
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="card-footer bg-light text-muted">
+                                            <small>
+                                                <i class="bi bi-clock"></i> 
+                                                Oluşturulma: @recommendation.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning text-center">
+                            <h4>📭 Henüz AI öneriniz bulunmuyor</h4>
+                            <p class="mb-3">Kişiselleştirilmiş fitness programı almak için aşağıdaki butona tıklayın.</p>
+                            <a asp-action="Index" class="btn btn-info text-white">
+                                🤖 Yeni AI Önerisi Al
+                            </a>
+                        </div>
+                    }
+
+                    <hr />
+
+                    <div class="d-grid gap-2">
+                        <a asp-action="Index" class="btn btn-primary">
+                            ➕ Yeni Öneri Al
+                        </a>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                            🏠 Ana Sayfaya Dön
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .recommendation-content {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        line-height: 1.8;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    
+    .recommendation-content h2 {
+        color: #0d6efd;
+        margin-top: 0;
+    }
+    
+    .recommendation-content h4 {
+        color: #198754;
+        margin-top: 20px;
+    }
+    
+    .recommendation-content ul {
+        margin-left: 20px;
+    }
+    
+    .accordion-button:not(.collapsed) {
+        background-color: #0dcaf0;
+        color: white;
+    }
+</style>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+}

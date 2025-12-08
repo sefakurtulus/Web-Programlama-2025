@@ -1,0 +1,134 @@
+@model List<GymManagementSystem.Models.Entities.Appointment>
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    var stats = ViewBag.Stats;
+}
+
+<div class="container-fluid">
+    <h2 class="mb-4">🎛️ Admin Dashboard</h2>
+
+    <!-- İstatistikler -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">👥 Toplam Üye</h5>
+                    <h2 class="card-text">@stats.TotalMembers</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">👨‍🏫 Antrenörler</h5>
+                    <h2 class="card-text">@stats.TotalTrainers</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">📋 Hizmetler</h5>
+                    <h2 class="card-text">@stats.TotalServices</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">📅 Randevular</h5>
+                    <h2 class="card-text">@stats.TotalAppointments</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hızlı İstatistikler -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">⏳ Bekleyen Randevular</h5>
+                    <h3 class="text-warning">@stats.PendingAppointments</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">📆 Bugünkü Randevular</h5>
+                    <h3 class="text-info">@stats.TodayAppointments</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hızlı Erişim -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Hızlı Erişim</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2 d-md-flex">
+                        <a asp-action="ManageServices" class="btn btn-primary">📋 Hizmetleri Yönet</a>
+                        <a asp-action="ManageTrainers" class="btn btn-success">👨‍🏫 Antrenörleri Yönet</a>
+                        <a asp-action="ManageAppointments" class="btn btn-warning">📅 Randevuları Yönet</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Son Randevular -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📋 Son Randevular</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Tarih</th>
+                                    <th>Saat</th>
+                                    <th>Üye</th>
+                                    <th>Antrenör</th>
+                                    <th>Hizmet</th>
+                                    <th>Durum</th>
+                                    <th>Oluşturulma</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var appointment in Model)
+                                {
+                                    var statusClass = appointment.Status switch
+                                    {
+                                        "Pending" => "warning",
+                                        "Approved" => "success",
+                                        "Cancelled" => "secondary",
+                                        "Completed" => "info",
+                                        _ => "primary"
+                                    };
+
+                                    <tr>
+                                        <td>@appointment.AppointmentDate.ToString("dd.MM.yyyy")</td>
+                                        <td>@appointment.StartTime.ToString(@"hh\:mm")</td>
+                                        <td>@appointment.User.FullName</td>
+                                        <td>@appointment.Trainer.FullName</td>
+                                        <td>@appointment.Service.Name</td>
+                                        <td><span class="badge bg-@statusClass">@appointment.Status</span></td>
+                                        <td>@appointment.CreatedAt.ToString("dd.MM HH:mm")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

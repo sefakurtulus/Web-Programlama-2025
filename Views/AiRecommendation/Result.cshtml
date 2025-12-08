@@ -1,0 +1,81 @@
+@{
+    ViewData["Title"] = "AI Önerisi Sonuç";
+    var recommendation = ViewBag.Recommendation as string;
+    var weight = ViewBag.Weight;
+    var height = ViewBag.Height;
+    var bmi = ViewBag.BMI;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-11">
+        <div class="card shadow-lg">
+            <div class="card-header bg-success text-white">
+                <h3 class="mb-0">✅ Kişiselleştirilmiş Fitness Programınız Hazır!</h3>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-success">
+                    <h5>📊 Bilgileriniz Kaydedildi</h5>
+                    <p class="mb-0">
+                        <strong>Kilo:</strong> @weight kg | 
+                        <strong>Boy:</strong> @height m | 
+                        <strong>BMI:</strong> @bmi
+                    </p>
+                </div>
+
+                <hr />
+
+                <div class="recommendation-content">
+                    @Html.Raw(recommendation ?? "Öneri oluşturulamadı.")
+                </div>
+
+                <hr />
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                    <a asp-action="Index" class="btn btn-primary">
+                        🔄 Yeni Öneri Al
+                    </a>
+                    <a asp-action="MyRecommendations" class="btn btn-outline-secondary">
+                        📋 Geçmiş Önerilerim
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .recommendation-content {
+        background-color: #f8f9fa;
+        padding: 30px;
+        border-radius: 10px;
+        line-height: 1.8;
+    }
+    .recommendation-content h2 {
+        color: #0d6efd;
+        margin-top: 0;
+        border-bottom: 3px solid #0d6efd;
+        padding-bottom: 10px;
+    }
+    .recommendation-content h4 {
+        color: #198754;
+        margin-top: 25px;
+        margin-bottom: 15px;
+    }
+    .recommendation-content h5 {
+        color: #495057;
+        margin-top: 20px;
+    }
+    .recommendation-content ul {
+        margin-left: 20px;
+        margin-top: 10px;
+    }
+    .recommendation-content .alert {
+        margin: 20px 0;
+    }
+    .recommendation-content strong {
+        color: #212529;
+    }
+    .ai-recommendation {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+</style>

@@ -1,0 +1,112 @@
+@model List<GymManagementSystem.Models.Entities.Appointment>
+@{
+    ViewData["Title"] = "Randevularım";
+}
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>📅 Randevularım</h2>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Yeni Randevu
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info text-center">
+            <h4>Henüz randevunuz bulunmuyor.</h4>
+            <p>Yeni bir randevu oluşturmak için yukarıdaki butona tıklayın.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var appointment in Model)
+            {
+                var statusClass = appointment.Status switch
+                {
+                    "Pending" => "warning",
+                    "Approved" => "success",
+                    "Cancelled" => "secondary",
+                    "Completed" => "info",
+                    _ => "primary"
+                };
+
+                var statusText = appointment.Status switch
+                {
+                    "Pending" => "Beklemede",
+                    "Approved" => "Onaylandı",
+                    "Cancelled" => "İptal Edildi",
+                    "Completed" => "Tamamlandı",
+                    _ => appointment.Status
+                };
+
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-@statusClass text-white">
+                            <h5 class="mb-0">@appointment.Service.Name</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-2">
+                                <strong>👨‍🏫 Antrenör:</strong> @appointment.Trainer.FullName
+                            </p>
+                            <p class="mb-2">
+                                <strong>📅 Tarih:</strong> @appointment.AppointmentDate.ToString("dd.MM.yyyy")
+                            </p>
+                            <p class="mb-2">
+                                <strong>🕒 Saat:</strong> @appointment.StartTime.ToString(@"hh\:mm") - @appointment.EndTime.ToString(@"hh\:mm")
+                            </p>
+                            <p class="mb-2">
+                                <strong>💰 Ücret:</strong> @appointment.Service.Price ₺
+                            </p>
+                            <p class="mb-0">
+                                <span class="badge bg-@statusClass">@statusText</span>
+                            </p>
+
+                            @if (!string.IsNullOrEmpty(appointment.Notes))
+                            {
+                                <hr />
+                                <p class="mb-0 small text-muted">
+                                    <strong>Not:</strong> @appointment.Notes
+                                </p>
+                            }
+                        </div>
+                        <div class="card-footer bg-light">
+                            <div class="d-grid gap-2">
+                                <a asp-action="Details" asp-route-id="@appointment.Id" class="btn btn-sm btn-outline-primary">
+                                    Detaylar
+                                </a>
+                                @if (appointment.Status == "Pending" || appointment.Status == "Approved")
+                                {
+                                    <form asp-action="Cancel" asp-route-id="@appointment.Id" method="post" 
+                                          onsubmit="return confirm('Randevuyu iptal etmek istediğinizden emin misiniz?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger w-100">
+                                            İptal Et
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

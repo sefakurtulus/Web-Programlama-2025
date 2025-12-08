@@ -1,0 +1,106 @@
+﻿@{
+    ViewData["Title"] = "Ana Sayfa";
+}
+
+<div class="text-center">
+    <h1 class="display-4">🏋️ Gym Management System'e Hoş Geldiniz!</h1>
+    <p class="lead">Modern spor salonu yönetim sisteminiz ile randevularınızı kolayca yönetin ve AI destekli fitness önerileri alın.</p>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <span style="font-size: 3rem;">📅</span>
+                </div>
+                <h5 class="card-title">Randevu Sistemi</h5>
+                <p class="card-text">Antrenörlerinizle kolayca randevu alın. Çakışma önleme sistemi ile güvenli rezervasyon.</p>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-controller="Appointments" asp-action="Create" class="btn btn-primary">Randevu Al</a>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary">Giriş Yapın</a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <span style="font-size: 3rem;">🤖</span>
+                </div>
+                <h5 class="card-title">AI Fitness Önerileri</h5>
+                <p class="card-text">Boy ve kilo bilgilerinizi girerek size özel diyet ve egzersiz programı alın.</p>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-controller="AiRecommendation" asp-action="Index" class="btn btn-info text-white">AI Öneri Al</a>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-info">Giriş Yapın</a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <span style="font-size: 3rem;">👨‍🏫</span>
+                </div>
+                <h5 class="card-title">Profesyonel Antrenörler</h5>
+                <p class="card-text">Alanında uzman antrenörlerimiz ile hedeflerinize ulaşın.</p>
+                <a asp-controller="Home" asp-action="Trainers" class="btn btn-success">Antrenörleri Gör</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (User.IsInRole("Admin"))
+{
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="alert alert-warning">
+                <h4>📊 Admin Paneli</h4>
+                <p>Admin olarak giriş yaptınız. Sistem yönetimi için admin panelini kullanabilirsiniz.</p>
+                <a asp-controller="Admin" asp-action="Dashboard" class="btn btn-warning">Admin Dashboard'a Git</a>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">📋 Hizmetlerimiz</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <h6>🧘 Yoga</h6>
+                        <p class="small">Rahatlatıcı yoga seansları - 60 dk</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h6>🤸 Pilates</h6>
+                        <p class="small">Kas tonlaması ve esneklik - 60 dk</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h6>💪 Fitness</h6>
+                        <p class="small">Genel kondisyon antrenmanı - 90 dk</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h6>👤 Kişisel Antrenman</h6>
+                        <p class="small">Birebir özel program - 60 dk</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
