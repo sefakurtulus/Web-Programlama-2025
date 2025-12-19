@@ -1,0 +1,111 @@
+@model List<GymManagementSystem.Models.Entities.Appointment>
+@{
+    ViewData["Title"] = "Randevu Yönetimi";
+}
+
+<div class="container-fluid">
+    <h2 class="mb-4">📅 Randevu Yönetimi</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Tarih/Saat</th>
+                            <th>Üye</th>
+                            <th>Antrenör</th>
+                            <th>Hizmet</th>
+                            <th>Durum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var appointment in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@appointment.AppointmentDate.ToString("dd MMM yyyy")</strong><br />
+                                    <small class="text-muted">@appointment.StartTime.ToString(@"hh\:mm") - @appointment.EndTime.ToString(@"hh\:mm")</small>
+                                </td>
+                                <td>
+                                    @appointment.User.FullName<br />
+                                    <small class="text-muted">@appointment.User.Email</small>
+                                </td>
+                                <td>@appointment.Trainer.FullName</td>
+                                <td>
+                                    @appointment.Service.Name<br />
+                                    <small class="text-muted">@appointment.Service.DurationMinutes dk - @appointment.Service.Price ₺</small>
+                                </td>
+                                <td>
+                                    @if (appointment.Status == "Pending")
+                                    {
+                                        <span class="badge bg-warning text-dark">Beklemede</span>
+                                    }
+                                    else if (appointment.Status == "Approved")
+                                    {
+                                        <span class="badge bg-info">Onaylandı</span>
+                                    }
+                                    else if (appointment.Status == "Completed")
+                                    {
+                                        <span class="badge bg-success">Tamamlandı</span>
+                                    }
+                                    else if (appointment.Status == "Cancelled")
+                                    {
+                                        <span class="badge bg-danger">İptal</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (appointment.Status == "Pending")
+                                    {
+                                        <form asp-action="ApproveAppointment" asp-route-id="@appointment.Id" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Bu randevuyu onaylamak istediğinizden emin misiniz?')">
+                                                Onayla
+                                            </button>
+                                        </form>
+                                    }
+                                    @if (appointment.Status == "Approved")
+                                    {
+                                        <form asp-action="CompleteAppointment" asp-route-id="@appointment.Id" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-primary" onclick="return confirm('Bu randevuyu tamamlandı olarak işaretlemek istediğinizden emin misiniz?')">
+                                                Tamamla
+                                            </button>
+                                        </form>
+                                    }
+                                    @if (appointment.Status == "Completed")
+                                    {
+                                        <span class="badge bg-success">✓ Bitti</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center mt-4">
+            <h4>Henüz randevu bulunmuyor</h4>
+            <p>Üyeler randevu oluşturduğunda burada görünecek.</p>
+        </div>
+    }
+</div>
+
+<style>
+    .table td {
+        vertical-align: middle;
+    }
+</style>

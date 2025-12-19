@@ -14,7 +14,7 @@ namespace GymManagementSystem.Models.ViewModels
         [Display(Name = "Email")]
         public string Email { get; set; } = string.Empty;
 
-        [Phone]
+        [RegularExpression(@"^\+90 \d{3}-\d{3}-\d{2}-\d{2}$", ErrorMessage = "Telefon formatı: +90 xxx-xxx-xx-xx")]
         [Display(Name = "Telefon")]
         public string? PhoneNumber { get; set; }
 

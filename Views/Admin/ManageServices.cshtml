@@ -57,11 +57,15 @@
                                     </a>
                                     @if (service.IsActive)
                                     {
-                                        <form asp-action="DeleteService" asp-route-id="@service.Id" method="post" class="d-inline"
-                                              onsubmit="return confirm('Hizmeti pasif hale getirmek istediğinizden emin misiniz?');">
-                                            @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-sm btn-danger">Pasif Yap</button>
-                                        </form>
+                                        <a asp-action="ToggleService" asp-route-id="@service.Id" class="btn btn-sm btn-danger" onclick="return confirm('Bu hizmeti pasif yapmak istediğinizden emin misiniz?')">
+                                            Pasif Yap
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-action="ToggleService" asp-route-id="@service.Id" class="btn btn-sm btn-success" onclick="return confirm('Bu hizmeti aktif yapmak istediğinizden emin misiniz?')">
+                                            Aktif Yap
+                                        </a>
                                     }
                                 </td>
                             </tr>

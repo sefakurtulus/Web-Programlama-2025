@@ -126,6 +126,22 @@ namespace GymManagementSystem.Controllers
             return RedirectToAction(nameof(ManageServices));
         }
 
+        // GET: Admin/ToggleService/5
+        public async Task<IActionResult> ToggleService(int id)
+        {
+            var service = await _context.Services.FindAsync(id);
+            if (service != null)
+            {
+                // Toggle IsActive status
+                service.IsActive = !service.IsActive;
+                await _context.SaveChangesAsync();
+                
+                var statusText = service.IsActive ? "aktif" : "pasif";
+                TempData["SuccessMessage"] = $"Hizmet {statusText} hale getirildi.";
+            }
+            return RedirectToAction(nameof(ManageServices));
+        }
+
         #endregion
 
         #region Trainers Management
@@ -149,11 +165,59 @@ namespace GymManagementSystem.Controllers
         // POST: Admin/CreateTrainer
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateTrainer(Trainer trainer)
+        public async Task<IActionResult> CreateTrainer(Trainer trainer, string[] Specialties, string[] AvailableDays)
         {
             if (ModelState.IsValid)
             {
+                // 1. Antrenörü kaydet
                 _context.Trainers.Add(trainer);
+                await _context.SaveChangesAsync();
+                
+                // 2. Uzmanlık alanlarını kaydet
+                if (Specialties != null && Specialties.Length > 0)
+                {
+                    foreach (var specialty in Specialties)
+                    {
+                        var trainerSpecialty = new TrainerSpecialty
+                        {
+                            TrainerId = trainer.Id,
+                            SpecialtyName = specialty
+                        };
+                        _context.TrainerSpecialties.Add(trainerSpecialty);
+                    }
+                }
+                
+                // 3. Müsaitlik saatlerini kaydet
+                if (AvailableDays != null && AvailableDays.Length > 0)
+                {
+                    foreach (var dayString in AvailableDays)
+                    {
+                        // Form'dan gelen saat bilgilerini al
+                        var startTimeKey = $"StartTimes_{dayString}";
+                        var endTimeKey = $"EndTimes_{dayString}";
+                        
+                        var startTimeStr = Request.Form[startTimeKey].ToString();
+                        var endTimeStr = Request.Form[endTimeKey].ToString();
+                        
+                        if (!string.IsNullOrEmpty(startTimeStr) && !string.IsNullOrEmpty(endTimeStr))
+                        {
+                            if (TimeSpan.TryParse(startTimeStr, out var startTime) && 
+                                TimeSpan.TryParse(endTimeStr, out var endTime))
+                            {
+                                var availability = new TrainerAvailability
+                                {
+                                    TrainerId = trainer.Id,
+                                    DayOfWeek = Enum.Parse<DayOfWeek>(dayString),
+                                    StartTime = startTime,
+                                    EndTime = endTime,
+                                    IsAvailable = true
+                                };
+                                _context.TrainerAvailabilities.Add(availability);
+                            }
+                        }
+                    }
+                }
+                
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Antrenör başarıyla eklendi.";
                 return RedirectToAction(nameof(ManageTrainers));
@@ -164,7 +228,11 @@ namespace GymManagementSystem.Controllers
         // GET: Admin/EditTrainer/5
         public async Task<IActionResult> EditTrainer(int id)
         {
-            var trainer = await _context.Trainers.FindAsync(id);
+            var trainer = await _context.Trainers
+                .Include(t => t.Specialties)
+                .Include(t => t.Availabilities)
+                .FirstOrDefaultAsync(t => t.Id == id);
+                
             if (trainer == null)
                 return NotFound();
 
@@ -174,7 +242,7 @@ namespace GymManagementSystem.Controllers
         // POST: Admin/EditTrainer/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditTrainer(int id, Trainer trainer)
+        public async Task<IActionResult> EditTrainer(int id, Trainer trainer, string[] Specialties, string[] AvailableDays)
         {
             if (id != trainer.Id)
                 return NotFound();
@@ -183,7 +251,65 @@ namespace GymManagementSystem.Controllers
             {
                 try
                 {
+                    // 1. Antrenör bilgilerini güncelle
                     _context.Update(trainer);
+                    
+                    // 2. Mevcut uzmanlıkları sil
+                    var oldSpecialties = await _context.TrainerSpecialties
+                        .Where(ts => ts.TrainerId == id)
+                        .ToListAsync();
+                    _context.TrainerSpecialties.RemoveRange(oldSpecialties);
+                    
+                    // 3. Yeni uzmanlıkları ekle
+                    if (Specialties != null && Specialties.Length > 0)
+                    {
+                        foreach (var specialty in Specialties)
+                        {
+                            var trainerSpecialty = new TrainerSpecialty
+                            {
+                                TrainerId = trainer.Id,
+                                SpecialtyName = specialty
+                            };
+                            _context.TrainerSpecialties.Add(trainerSpecialty);
+                        }
+                    }
+                    
+                    // 4. Mevcut müsaitlikleri sil
+                    var oldAvailabilities = await _context.TrainerAvailabilities
+                        .Where(ta => ta.TrainerId == id)
+                        .ToListAsync();
+                    _context.TrainerAvailabilities.RemoveRange(oldAvailabilities);
+                    
+                    // 5. Yeni müsaitlikleri ekle
+                    if (AvailableDays != null && AvailableDays.Length > 0)
+                    {
+                        foreach (var dayString in AvailableDays)
+                        {
+                            var startTimeKey = $"StartTimes_{dayString}";
+                            var endTimeKey = $"EndTimes_{dayString}";
+                            
+                            var startTimeStr = Request.Form[startTimeKey].ToString();
+                            var endTimeStr = Request.Form[endTimeKey].ToString();
+                            
+                            if (!string.IsNullOrEmpty(startTimeStr) && !string.IsNullOrEmpty(endTimeStr))
+                            {
+                                if (TimeSpan.TryParse(startTimeStr, out var startTime) && 
+                                    TimeSpan.TryParse(endTimeStr, out var endTime))
+                                {
+                                    var availability = new TrainerAvailability
+                                    {
+                                        TrainerId = trainer.Id,
+                                        DayOfWeek = Enum.Parse<DayOfWeek>(dayString),
+                                        StartTime = startTime,
+                                        EndTime = endTime,
+                                        IsAvailable = true
+                                    };
+                                    _context.TrainerAvailabilities.Add(availability);
+                                }
+                            }
+                        }
+                    }
+                    
                     await _context.SaveChangesAsync();
                     TempData["SuccessMessage"] = "Antrenör başarıyla güncellendi.";
                 }

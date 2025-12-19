@@ -14,7 +14,7 @@ namespace GymManagementSystem.Models.Entities
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
 
-        [Phone]
+        [RegularExpression(@"^\+90 \d{3}-\d{3}-\d{2}-\d{2}$", ErrorMessage = "Telefon numarası formatı: +90 xxx-xxx-xx-xx")]
         public string? PhoneNumber { get; set; }
 
         [MaxLength(500)]
